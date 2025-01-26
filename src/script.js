@@ -1,11 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import PdfPage from './components/PdfPage';
+import PdfDocument from "./components/PdfDocument";
+import {setImageGetPagePayload} from "./components/scripts/PayloadManager";
 
-export async function convertToBase64() {
+export async function convertUploadedFileToBase64() {
     return new Promise((resolve, reject) => {
         const fileInput = document.getElementById('fileInput');
         const file = fileInput.files[0];
+        console.log("STARTING TO CONVERT");
 
         if (file) {
             const reader = new FileReader();
@@ -20,53 +22,42 @@ export async function convertToBase64() {
     })
 }
 
-function sendBase64ToServer(data) {
+function sendBase64ToServer(bodyPayload, start = 0, end = 5) {
     return new Promise( (resolve, reject) => {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
-        const raw = JSON.stringify({
-            "base64": `${data}`
-        });
-
         const requestOptions = {
             method: "POST",
             headers: myHeaders,
-            body: raw,
+            body: bodyPayload,
             redirect: "follow"
         };
 
-        document.getElementById('loading-message').style.display = 'block';
-
-        fetch("/pdf/convert/image?start=0&end=10", requestOptions)
+        fetch(`/pdf/convert/image/getPage?start=${start}&end=${end}`, requestOptions)
             .then((response) => response.text())
             .then((result) => {
-                document.getElementById('loading-message').style.display = 'none';
-                resolve(JSON.parse(result));
-            })
-            .catch((error) => console.error(error));
+                //Result is JSON as a string not an object!
+                let payload = JSON.parse(result);
+                setImageGetPagePayload(payload);
+                resolve(payload);
+            }).catch((error) => console.error(error));
     })
 }
 
-export async function loadImages() {
-    let data = await convertToBase64().catch(reason => alert(reason));
-
-    sendBase64ToServer(data).then(value => {
-        console.log(value);
+export function loadImages(payload, start = 0, end = 5) {
+    document.getElementById('loading-message').style.display = 'block';
+    sendBase64ToServer(payload,start, end).then(value => {
+        document.getElementById('loading-message').style.display = 'none';
         let images = document.getElementById("images");
-
-        for (let i = 0; i < value.base64Images.length; i++) {
-            let container = document.createElement("div");
-            images.appendChild(container);
-            container.id = `page_${i}`;
-
-            let base64Image = value.base64Images[i];
-            if (images){
-                const root = ReactDOM.createRoot(container);
-                root.render(<PdfPage base64Image={base64Image} pageNumber={i}></PdfPage>)
-            }else{
-                console.error("Container for images not found!")
-            }
-        }
+        let container = document.createElement("div");
+        images.appendChild(container);
+        const root = ReactDOM.createRoot(container);
+        root.render(<PdfDocument images={value.base64Images} start={start} end={end} numberOfPages={value.numberOfPages}/>)
     });
+}
+
+export function clearImages(){
+    let images = document.getElementById("images");
+    images.innerHTML = "";
 }
