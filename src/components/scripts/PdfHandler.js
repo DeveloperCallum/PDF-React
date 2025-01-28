@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import PdfDocument from "./components/PdfDocument";
-import {setImageGetPagePayload} from "./components/scripts/PayloadManager";
+import PdfDocument from "../PdfDocument";
+import {setImageGetPageBase64PDF, setImageGetPagePayload} from "./PayloadManager";
 
 export async function convertUploadedFileToBase64() {
     return new Promise((resolve, reject) => {
@@ -56,9 +56,4 @@ export function loadImages(payload, start = 0, end = 5) {
         const root = ReactDOM.createRoot(container);
         root.render(<PdfDocument images={value.base64Images} start={start} end={end} numberOfPages={value.numberOfPages} width={value.width} height={value.height}/>)
     });
-}
-
-export function clearImages(){
-    let images = document.getElementById("images");
-    images.innerHTML = "";
 }
