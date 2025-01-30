@@ -1,18 +1,27 @@
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {
     getBottomRightCoordinates,
     getCoordsAsUpperLeftAndLowerRight, getGlobalPosition, globalToRelativeCoordinates
 } from "./scripts/coordinateUtils";
 
 export default function Selection({index, top, left, y1, x1, y2, x2, zoomLevel, pageNumber, onUpdatePosition}) {
+    const [position, setPosition] = useState({y1, x1, y2, x2});
     let width = Math.abs(x2 - x1);
     let height = Math.abs(y2 - y1);
+
+    const updatePosition = (newValues) => {
+        setPosition(prevPosition => ({...prevPosition, ...newValues}));
+
+        if (onUpdatePosition){
+            onUpdatePosition(newValues);
+        }
+    };
 
     useEffect(() => {
         dragElement(document.getElementById(`selection-${index}`), index); //Make the DIV element draggable
     })
 
-    let coords = getCoordsAsUpperLeftAndLowerRight(x1, y1, x2, y2);
+    let coords = getCoordsAsUpperLeftAndLowerRight(position.x1, position.y1, position.x2, position.y2);
     return (<div onClick={onClickHandle} id={`selection-${index}`} className={"selections"} style={{
         top: `${top + (coords.y1 * zoomLevel)}px`,
         left: `${left + (coords.x1 * zoomLevel)}px`,
@@ -26,14 +35,12 @@ export default function Selection({index, top, left, y1, x1, y2, x2, zoomLevel, 
         let point1 = globalToRelativeCoordinates(elementPosGlobal.left, elementPosGlobal.top, document.getElementById(`image-${pageNumber}`));
         let point2 = getBottomRightCoordinates(point1.x, point1.y, width, height);
 
-        if (onUpdatePosition) {
-            onUpdatePosition({ //we need to update the data.
-                "newX1": point1.x / zoomLevel,
-                "newY1": point1.y / zoomLevel,
-                "newX2": point2.bottomX / zoomLevel,
-                "newY2": point2.bottomY / zoomLevel
-            })
-        }
+        updatePosition({ //we need to update the data.
+            "x1": point1.x / zoomLevel,
+            "y1": point1.y / zoomLevel,
+            "x2": point2.bottomX / zoomLevel,
+            "y2": point2.bottomY / zoomLevel
+        })
     }
 }
 
