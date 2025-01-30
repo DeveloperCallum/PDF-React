@@ -7,6 +7,7 @@
     "express": "^4.21.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-draggable": "^4.4.6",
     "react-scripts": "5.0.1",
     "syslog": "^0.1.1-1",
     "syslog-client": "^1.1.1"

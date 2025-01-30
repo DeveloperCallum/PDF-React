@@ -1,7 +1,7 @@
 import './App.css';
-import {convertUploadedFileToBase64, loadImages} from './components/scripts/PdfHandler'
+import {convertUploadedFileToBase64, loadImages} from './components/scripts/pdfHandler'
 import {clearImages} from "./components/PdfDocument";
-import {setImageGetPageBase64PDF} from "./components/scripts/PayloadManager";
+import {setImageGetPageBase64PDF} from "./components/scripts/payloadManager";
 
 function App() {
     function onClick(){

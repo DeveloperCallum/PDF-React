@@ -1,6 +1,8 @@
 import ReactDOM from "react-dom/client";
 import {useEffect, useState} from "react";
 import './selections.css';
+import Selection from "./Selection";
+import {getGlobalPosition, globalToRelativeCoordinates} from "./scripts/coordinateUtils";
 
 export default function PdfPage({base64Image, pageNumber, height, width, zoomLevel = 1}) {
     const [selections, setSelections] = useState([]);
@@ -11,57 +13,63 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
         }
 
         setSelections(prevState => [...prevState, selection]);
+        console.log(selection);
     }
 
+    let firstSelection;
     const handleClick = (event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = (event.clientX - rect.left);
-        const y = (event.clientY - rect.top);
+        const relativeCords = globalToRelativeCoordinates(event.clientX, event.clientY, event.currentTarget);
 
-        addSelection({x: x / zoomLevel, y: y / zoomLevel});
-        console.log(selections);
-        console.log(`Clicked Coordinates: X: ${x / zoomLevel}, Y: ${y / zoomLevel}`);
+        if (!firstSelection) {
+            return firstSelection = {
+                x1: relativeCords.x / zoomLevel,
+                y1: relativeCords.y / zoomLevel,
+                x2: undefined,
+                y2: undefined
+            };
+        }
+
+        firstSelection.x2 = relativeCords.x / zoomLevel;
+        firstSelection.y2 = relativeCords.y / zoomLevel;
+
+        addSelection(firstSelection); //if both clicks have happened, save the region.
     };
 
-    function getGlobalPosition(element) {
-        const rect = element.getBoundingClientRect();
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        return {
-            top: rect.top + scrollTop,
-            left: rect.left + scrollLeft
-        };
+    function onUpdate(e) {
+        console.log(e);
     }
 
     useEffect(() => {
+        let selectionsElement = [];
         selections.map((value, index) => {
-            const imageElement = document.getElementById(`image-${pageNumber}`);
-            if (imageElement) {
-                let imagePos = getGlobalPosition(document.getElementById(`image-${pageNumber}`));
-                let selections = document.getElementById(`selections-${pageNumber}`);
-                let root = ReactDOM.createRoot(selections);
-                root.render(<div id={`selections-${index}`} className={"selections"}
-                                 style={{
-                                     top: `${imagePos.top +   (value.y * zoomLevel)}px`,
-                                     left: `${imagePos.left + (value.x  * zoomLevel)}px`,
-                                     width: `100px`, height: `100px`, backgroundColor: `red`
-                                 }}></div>);
-            }
+            let imagePos = getGlobalPosition(document.getElementById(`image-${pageNumber}`));
 
-            return '';
+            let div = <Selection left={imagePos.left} top={imagePos.top} y1={value.y1} x1={value.x1} x2={value.x2}
+                                 y2={value.y2} index={index} pageNumber={pageNumber} zoomLevel={zoomLevel} onUpdatePosition={onUpdate}/>;
+
+            selectionsElement.push(div);
+            return ''
         });
-    }, [selections, zoomLevel])
+
+        let container = document.getElementById(`selections-${pageNumber}`);
+        let root = ReactDOM.createRoot(container);
+        root.render(<>{selectionsElement}</>);
+    }, [pageNumber, selections, zoomLevel])
 
     return (<>
-            <div id={`container-${pageNumber}`}>
-                <p>{pageNumber + 1}</p>
-                <div id={`selections-${pageNumber}`}></div>
-                <div style={{zoom: zoomLevel}}>
-                    <img id={`image-${pageNumber}`} onClick={handleClick} src={'data:image/png;base64,' + base64Image}
-                         alt={`Page ${pageNumber}`}
-                         height={height} width={width}/>
-                </div>
+        <div id={`container-${pageNumber}`}>
+            <p>{pageNumber + 1}</p>
+            <button onClick={() => {
+                setSelections([])
+            }}>Clear Selections
+            </button>
+
+            <div id={`selections-${pageNumber}`}></div>
+            <div style={{zoom: zoomLevel}}>
+                <img id={`image-${pageNumber}`} onClick={handleClick} src={'data:image/png;base64,' + base64Image}
+                     alt={`Page ${pageNumber}`}
+                     height={height} width={width}/>
             </div>
-        </>
-    );
+        </div>
+    </>);
 }

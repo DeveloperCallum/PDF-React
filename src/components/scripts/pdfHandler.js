@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import PdfDocument from "../PdfDocument";
-import {setImageGetPageBase64PDF, setImageGetPagePayload} from "./PayloadManager";
+import {setImageGetPageBase64PDF, setImageGetPagePayload} from "./payloadManager";
 
 export async function convertUploadedFileToBase64() {
     return new Promise((resolve, reject) => {

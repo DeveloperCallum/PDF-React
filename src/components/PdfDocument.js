@@ -1,6 +1,6 @@
 import PdfPage from "./PdfPage";
-import {loadImages} from "./scripts/PdfHandler";
-import {getImageGetPagePayload} from "./scripts/PayloadManager";
+import {loadImages} from "./scripts/pdfHandler";
+import {getImageGetPagePayload} from "./scripts/payloadManager";
 import React, {useState} from 'react';
 import {getZoomLevel} from "./scripts/zoom";
 
