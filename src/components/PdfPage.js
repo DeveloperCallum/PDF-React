@@ -2,7 +2,13 @@ import ReactDOM from "react-dom/client";
 import {useEffect, useState} from "react";
 import './selections.css';
 import Selection from "./Selection";
-import {getGlobalPosition, globalToRelativeCoordinates} from "./scripts/coordinateUtils";
+import {
+    getGlobalPosition,
+    getOffset,
+    getPosition,
+    getXYRelativeCoords,
+    globalToRelativeCoordinates
+} from "./scripts/coordinateUtils";
 
 export default function PdfPage({base64Image, pageNumber, height, width, zoomLevel = 1}) {
     const [selections, setSelections] = useState([]);
@@ -16,24 +22,15 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
         console.log(selection);
     }
 
-    let firstSelection;
     const handleClick = (event) => {
-        const relativeCords = globalToRelativeCoordinates(event.clientX, event.clientY, event.currentTarget);
+        let image = document.getElementById(`image-${pageNumber}`)
+        let cursorX = event.pageX; //get cursorX relative to whole page.
+        let cursorY = event.pageY; //get cursorY relative to whole page.
 
-        if (!firstSelection) {
-            return firstSelection = {
-                x1: relativeCords.x / zoomLevel,
-                y1: relativeCords.y / zoomLevel,
-                x2: undefined,
-                y2: undefined
-            };
-        }
-
-        firstSelection.x2 = relativeCords.x / zoomLevel;
-        firstSelection.y2 = relativeCords.y / zoomLevel;
-
-        addSelection(firstSelection); //if both clicks have happened, save the region.
-    };
+        //Convert to coordinates relative to the element.
+        let relativeCoordinates = getXYRelativeCoords(cursorX, cursorY, image);
+        console.log({"x": relativeCoordinates.left / zoomLevel, "y": relativeCoordinates.top / zoomLevel})
+    }
 
     function onUpdate(e) {
         console.log(e);
@@ -45,7 +42,8 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
             let imagePos = getGlobalPosition(document.getElementById(`image-${pageNumber}`));
 
             let div = <Selection left={imagePos.left} top={imagePos.top} y1={value.y1} x1={value.x1} x2={value.x2}
-                                 y2={value.y2} index={index} pageNumber={pageNumber} zoomLevel={zoomLevel} onUpdatePosition={onUpdate}/>;
+                                 y2={value.y2} index={index} pageNumber={pageNumber} zoomLevel={zoomLevel}
+                                 onUpdatePosition={onUpdate}/>;
 
             selectionsElement.push(div);
             return ''
