@@ -23,15 +23,32 @@ export function getGlobalPosition(element) {
 export function getBottomRightCoordinates(x, y, width, height) {
     const bottomX = x + width;
     const bottomY = y + height;
-    return { bottomX, bottomY };
+    return {bottomX, bottomY};
 }
 
-export function globalToRelativeCoordinates(x, y, element) {
-    const rect = element.getBoundingClientRect();
-    const relativeX = x - rect.left;
-    const relativeY = y - rect.top;
-    console.log(`${x} - ${rect.left}`);
-    console.log(`${y} - ${rect.top}`);
+export function getPosition(element) {
+    var clientRect = element.getBoundingClientRect();
+    return {
+        left: clientRect.left + window.pageXOffset,
+        top: clientRect.top + window.pageYOffset
+    };
+}
 
-    return { "x": relativeX, "y": relativeY };
+export function getRelativeCoords(element, relativeTo) {
+    var elementRect = element.getBoundingClientRect();
+    var relativeToRect = relativeTo.getBoundingClientRect();
+
+    return {
+        left: elementRect.left - relativeToRect.left,
+        top: elementRect.top - relativeToRect.top
+    };
+}
+
+export function getXYRelativeCoords(x,y, relativeTo) {
+    var relativeToRect = relativeTo.getBoundingClientRect();
+
+    return {
+        left: x - relativeToRect.left,
+        top: y - relativeToRect.top
+    };
 }
