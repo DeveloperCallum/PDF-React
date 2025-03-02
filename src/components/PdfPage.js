@@ -15,10 +15,10 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
         }
 
         setSelections(prevState => [...prevState, selection]);
-        console.log(selection);
     }
 
     let firstPosition;
+    let secondPosition;
     const handleClick = (event) => {
         let image = document.getElementById(`image-${pageNumber}`)
         let cursorX = event.pageX; //get cursorX relative to whole page.
@@ -26,12 +26,13 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
 
         //Convert to coordinates relative to the element.
         let imagePos = getPosition(image);
-        console.log(`image: ${imagePos.left}, ${imagePos.top}`);
-        console.log(`cursor: ${cursorX}, ${cursorY}`);
-        console.log(`difference: ${(cursorX - imagePos.left) / zoomLevel}, ${(cursorY - imagePos.top) / zoomLevel}`);
 
         if (!firstPosition) {
             return firstPosition = {
+                "x": (cursorX - imagePos.left) / zoomLevel, "y": (cursorY - imagePos.top) / zoomLevel
+            }
+        }else{
+            secondPosition = {
                 "x": (cursorX - imagePos.left) / zoomLevel, "y": (cursorY - imagePos.top) / zoomLevel
             }
         }
@@ -39,8 +40,8 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
         addSelection({
             "x1": firstPosition.x,
             "y1": firstPosition.y,
-            "x2": (cursorX - imagePos.left) / zoomLevel,
-            "y2": (cursorY - imagePos.top) / zoomLevel,
+            "x2": secondPosition.x,
+            "y2": secondPosition.y,
         })
 
         firstPosition = undefined;
@@ -58,8 +59,6 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
                                      selections[index] = e;
                                  }}
                                  onDelete={() => {
-                                     console.log(selections.length)
-
                                      setSelections(prevSelections => {
                                          const newArr = [...prevSelections];
                                          newArr.splice(index, 1);

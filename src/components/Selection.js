@@ -4,10 +4,6 @@ import {
 } from "./scripts/coordinateUtils";
 
 export default function Selection({index, top, left, selections, zoomLevel, onDelete, onUpdateSelectionsEvent}) {
-    const prepareUpdateEvent = (e) => {
-        let newValue = e.target.value;
-    }
-
     let coords = getCoordsAsUpperLeftAndLowerRight(selections.x1, selections.y1, selections.x2, selections.y2);
     return (<div id={`selection-${index}`} className={"selections"} style={{
         top: `${top + (coords.y1 * zoomLevel)}px`,
@@ -17,8 +13,7 @@ export default function Selection({index, top, left, selections, zoomLevel, onDe
     }}>
 
         <div className={"selection-controls"}>
-            <select className={"clean"} defaultValue={"column"} name={"type"} onChange={prepareUpdateEvent}
-                    id={`selection-${index}-type`}>
+            <select className={"clean"} defaultValue={"column"} name={"type"} id={`selection-${index}-type`}>
                 <option value="table">Table</option>
                 <option value="column">Column</option>
                 <option value="entry">Entry</option>
