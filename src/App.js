@@ -14,7 +14,7 @@ function App() {
 
     return (
         <div className="App">
-            <h2>Select a file to convert to Base64</h2>
+            <h2>PDF Extractor</h2>
             <input type="file" id="fileInput"/>
             <button onClick={onClick}>Convert</button>
             <div id="loading-message" style={{display: "none"}}>LOADING IMAGES</div>

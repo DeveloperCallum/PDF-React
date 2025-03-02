@@ -40,14 +40,10 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
             "x1": firstPosition.x,
             "y1": firstPosition.y,
             "x2": (cursorX - imagePos.left) / zoomLevel,
-            "y2": (cursorY - imagePos.top) / zoomLevel
+            "y2": (cursorY - imagePos.top) / zoomLevel,
         })
 
         firstPosition = undefined;
-    }
-
-    function onUpdate(e) {
-        console.log(e);
     }
 
     useEffect(() => {
@@ -55,9 +51,21 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
         selections.map((value, index) => {
             let imagePos = getGlobalPosition(document.getElementById(`image-${pageNumber}`));
 
-            let div = <Selection left={imagePos.left} top={imagePos.top} y1={value.y1} x1={value.x1} x2={value.x2}
-                                 y2={value.y2} index={index} pageNumber={pageNumber} zoomLevel={zoomLevel}
-                                 onUpdatePosition={onUpdate}/>;
+            let div = <Selection left={imagePos.left} top={imagePos.top} selections={selections[index]} y1={value.y1}
+                                 x1={value.x1} x2={value.x2} y2={value.y2} index={index}
+                                 pageNumber={pageNumber} zoomLevel={zoomLevel} type={value.type}
+                                 onUpdateSelectionsEvent={(e) => {
+                                     selections[index] = e;
+                                 }}
+                                 onDelete={() => {
+                                     console.log(selections.length)
+
+                                     setSelections(prevSelections => {
+                                         const newArr = [...prevSelections];
+                                         newArr.splice(index, 1);
+                                         return newArr;
+                                     });
+                                 }}/>;
 
             selectionsElement.push(div);
             return ''
