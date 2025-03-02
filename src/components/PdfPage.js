@@ -3,11 +3,7 @@ import {useEffect, useState} from "react";
 import './selections.css';
 import Selection from "./Selection";
 import {
-    getGlobalPosition,
-    getOffset,
-    getPosition,
-    getXYRelativeCoords,
-    globalToRelativeCoordinates
+    getGlobalPosition, getOffset, getPosition, getXYRelativeCoords, globalToRelativeCoordinates
 } from "./scripts/coordinateUtils";
 
 export default function PdfPage({base64Image, pageNumber, height, width, zoomLevel = 1}) {
@@ -22,14 +18,32 @@ export default function PdfPage({base64Image, pageNumber, height, width, zoomLev
         console.log(selection);
     }
 
+    let firstPosition;
     const handleClick = (event) => {
         let image = document.getElementById(`image-${pageNumber}`)
         let cursorX = event.pageX; //get cursorX relative to whole page.
         let cursorY = event.pageY; //get cursorY relative to whole page.
 
         //Convert to coordinates relative to the element.
-        let relativeCoordinates = getXYRelativeCoords(cursorX, cursorY, image);
-        console.log({"x": relativeCoordinates.left / zoomLevel, "y": relativeCoordinates.top / zoomLevel})
+        let imagePos = getPosition(image);
+        console.log(`image: ${imagePos.left}, ${imagePos.top}`);
+        console.log(`cursor: ${cursorX}, ${cursorY}`);
+        console.log(`difference: ${(cursorX - imagePos.left) / zoomLevel}, ${(cursorY - imagePos.top) / zoomLevel}`);
+
+        if (!firstPosition) {
+            return firstPosition = {
+                "x": (cursorX - imagePos.left) / zoomLevel, "y": (cursorY - imagePos.top) / zoomLevel
+            }
+        }
+
+        addSelection({
+            "x1": firstPosition.x,
+            "y1": firstPosition.y,
+            "x2": (cursorX - imagePos.left) / zoomLevel,
+            "y2": (cursorY - imagePos.top) / zoomLevel
+        })
+
+        firstPosition = undefined;
     }
 
     function onUpdate(e) {

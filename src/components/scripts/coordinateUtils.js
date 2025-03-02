@@ -43,12 +43,3 @@ export function getRelativeCoords(element, relativeTo) {
         top: elementRect.top - relativeToRect.top
     };
 }
-
-export function getXYRelativeCoords(x,y, relativeTo) {
-    var relativeToRect = relativeTo.getBoundingClientRect();
-
-    return {
-        left: x - relativeToRect.left,
-        top: y - relativeToRect.top
-    };
-}
